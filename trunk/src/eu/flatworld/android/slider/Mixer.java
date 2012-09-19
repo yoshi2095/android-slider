@@ -4,28 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.badlogic.gdx.audio.AudioDevice;
-import com.badlogic.gdx.audio.CircularBuffer;
 
 public class Mixer implements Runnable {
 	List<Keyboard> keyboards;
 	AudioDevice audioDevice;
 	
 	boolean stop = false;
-	boolean stopped = true;
 	Thread thread;
 
 	int bufferSize;
-	short[] buffer;
-
-	int snapshotBufferSize;
-	short[] snapshotBuffer;
-	CircularBuffer snapshotCircularBuffer;
-	
+	short[] buffer;	
 
 	public Mixer() {
 		keyboards = new ArrayList<Keyboard>();
 		bufferSize = 1024;
-		snapshotBufferSize = 1920;
 	}
 
 	public void addKeyboard(Keyboard keyboard) {
@@ -46,14 +38,6 @@ public class Mixer implements Runnable {
 
 	public void setBufferSize(int bufferSize) {
 		this.bufferSize = bufferSize;
-	}
-
-	public int getSnapshotBufferSize() {
-		return snapshotBufferSize;
-	}
-
-	public void setSnapshotBufferSize(int snapshotBufferSize) {
-		this.snapshotBufferSize = snapshotBufferSize;
 	}
 
 	public void setAudioDevice(AudioDevice audioDevice) {
@@ -82,7 +66,6 @@ public class Mixer implements Runnable {
 			}
 			buffer[i] = (short)(val * Short.MAX_VALUE);
 		}
-		snapshotCircularBuffer.write(buffer, 0, buffer.length);
 	}
 
 	public void run() {
@@ -90,7 +73,6 @@ public class Mixer implements Runnable {
 			fillBuffer(buffer);
 			audioDevice.writeSamples(buffer, 0, bufferSize);
 		}
-		stopped = true;
 	}
 
 	void sleep(long t) {
@@ -101,14 +83,8 @@ public class Mixer implements Runnable {
 	}
 
 	public void start() {
-		if (!stopped) {
-			return;
-		}
-		snapshotCircularBuffer = new CircularBuffer(snapshotBufferSize);
-		snapshotBuffer = new short[snapshotBufferSize];
 		buffer = new short[bufferSize];		
 		stop = false;
-		stopped = false;
 		thread = new Thread(this);
 		thread.setPriority(Thread.MAX_PRIORITY);
 		thread.start();
@@ -116,18 +92,12 @@ public class Mixer implements Runnable {
 
 	public void stop() {
 		stop = true;
-		while (!stopped) {
-			sleep(500);
+		try {
+			thread.join();
+		} catch(Exception ex) {			
 		}
 		keyboards.clear();
 		keyboards = null;
-		snapshotCircularBuffer.clear();
-		snapshotCircularBuffer = null;
-		snapshotBuffer = null;
 		buffer = null;
-	}
-	
-	public void takeSnapshot() {
-		snapshotCircularBuffer.read(snapshotBuffer, 0, snapshotBufferSize);
 	}
 }
