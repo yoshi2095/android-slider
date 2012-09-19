@@ -17,6 +17,13 @@
             android:summary="@string/preferences_numberofkeyboards_summary"
             android:title="@string/preferences_numberofkeyboards_title" />
 
+        <!-- eu.flatworld.android.slider.SeekBarPreference
+            android:defaultValue="50"
+            android:key="buffersize"
+            android:max="1000"
+            android:summary="@string/preferences_buffersize_summary"
+            android:title="@string/preferences_buffersize_title" /-->
+
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="dynamicbackground"
@@ -27,11 +34,11 @@
             android:key="analytics"
             android:summary="@string/preferences_analytics_summary"
             android:title="@string/preferences_analytics_title" />
-        <!-- CheckBoxPreference
+        <CheckBoxPreference
             android:defaultValue="false"
             android:key="showfps"
             android:summary="Show frames per seconds on screen"
-            android:title="Show FPS" /-->
+            android:title="Show FPS" />
     </PreferenceCategory>
     <PreferenceCategory
         android:key="keyboard1"
