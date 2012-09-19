@@ -1,5 +1,7 @@
 package eu.flatworld.android.slider;
 
+import com.badlogic.gdx.math.MathUtils;
+
 import eu.flatworld.android.slider.R;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -161,7 +163,7 @@ public class SeekBarPreference extends Preference implements OnSeekBarChangeList
         else if(newValue < mMinValue)
             newValue = mMinValue;
         else if(mInterval != 1 && newValue % mInterval != 0)
-            newValue = Math.round(((float)newValue)/mInterval)*mInterval;  
+            newValue = MathUtils.round(((float)newValue)/mInterval)*mInterval;  
        
         // change rejected, revert to the previous value
         if(!callChangeListener(newValue)){

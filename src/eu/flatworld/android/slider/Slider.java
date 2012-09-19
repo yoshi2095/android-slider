@@ -1,5 +1,6 @@
 package eu.flatworld.android.slider;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -24,6 +25,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
@@ -33,6 +35,9 @@ public class Slider implements ApplicationListener, InputProcessor {
 	public static int PIXMAP_HEIGHT = 512;
 
 	public static int MAX_CHANNELS = 4;
+	
+	int[] lastTx = new int[MAX_CHANNELS];
+	int[] lastTy = new int[MAX_CHANNELS];
 
 	AudioDevice audioDevice;
 	Mixer mixer;
@@ -67,6 +72,8 @@ public class Slider implements ApplicationListener, InputProcessor {
 
 	public Slider(Context context) {
 		this.context = context;
+		Arrays.fill(lastTx, Integer.MAX_VALUE);
+		Arrays.fill(lastTy, Integer.MAX_VALUE);
 	}
 
 	void drawFps(float x, float y) {
@@ -203,7 +210,12 @@ public class Slider implements ApplicationListener, InputProcessor {
 		
 		GA.setCustomVar(4, "SampleRate", "" + sampleRate, GA.SCOPE_SESSION);
 
+		int bufferSize = pref.getInt("buffersize", 50);
+		GA.setCustomVar(5, "BufferSize", "" + bufferSize, GA.SCOPE_SESSION);
+		
 		mixer = new Mixer();
+		int byteBufferSize = MathUtils.round(sampleRate * bufferSize / 1000f);
+		mixer.setBufferSize(byteBufferSize);
 		for (int i = 0; i < numberOfKeyboards; i++) {
 			int firstOctave = 4;
 			try {
@@ -347,6 +359,12 @@ public class Slider implements ApplicationListener, InputProcessor {
 		if (pointer >= MAX_CHANNELS) {
 			return false;
 		}
+		if(lastTx[pointer] == tx && lastTy[pointer] == ty) {
+			return true;
+		}
+		lastTx[pointer] = tx;
+		lastTy[pointer] = ty;
+		
 		cam.unproject(p1.set(tx, ty, 0));
 		x = (int) p1.x;
 		y = (int) p1.y;

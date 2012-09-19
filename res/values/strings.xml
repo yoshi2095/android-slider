@@ -27,7 +27,7 @@
 	<string name="preferences_greenkeyboard">Green keyboard</string>
 	<string name="preferences_bluekeyboard">Blue keyboard</string>
 	<string name="preferences_yellowkeyboard">Yellow keyboard</string>
-	<string name="preferences_samplerate_summary">Lower sample rates put less strain on the cpu but they don\'t allow to play higher frequancies that will result silent.</string>
+	<string name="preferences_samplerate_summary">Lower sample rates put less strain on the cpu but they don\'t allow to play higher frequancies that will result silent</string>
 	<string name="preferences_samplerate_title">Sample rate (Hz)</string>
 	<string name="preferences_numberofkeyboards_summary">Number of keyboards visible on the screen:</string>
 	<string name="preferences_numberofkeyboards_title">Number of keyboards</string>
@@ -46,4 +46,6 @@
 	<string name="preferences_dynamicbackground_summary">Change the background color during play</string>
 	<string name="preferences_analytics_title">Enable Google Analytics</string>
 	<string name="preferences_analytics_summary">Send anonyomous usage statistics to the developers.</string>
+	<string name="preferences_buffersize_title">Buffer size (ms)</string>
+	<string name="preferences_buffersize_summary">Higher values may reduce playback problems but cause a slight delay between the touch and the start of the sound.</string>
 </resources>

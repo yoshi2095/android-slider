@@ -1,5 +1,7 @@
 package eu.flatworld.android.slider;
 
+import com.badlogic.gdx.math.MathUtils;
+
 
 
 /**
@@ -145,7 +147,7 @@ public class Envelope {
 			//starts where the release/decay slope arrived
 			//value = currentSample * attackSlope + min;
 			if(attackSlope != 0) {
-				currentSample = Math.round((lastValue - min) / attackSlope);
+				currentSample = MathUtils.round((lastValue - min) / attackSlope);
 			} else {
 				currentSample = 0;
 			}

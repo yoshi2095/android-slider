@@ -1,5 +1,7 @@
 package eu.flatworld.android.slider;
 
+import com.badlogic.gdx.math.MathUtils;
+
 
 public final class Oscillator {
 	float frequency;
@@ -34,7 +36,7 @@ public final class Oscillator {
 		if(frequency == 0) {
 			periodSamples = Long.MAX_VALUE;
 		} else {
-			periodSamples = (long) Math.round(sampleRate / frequency);
+			periodSamples = (long) MathUtils.round(sampleRate / frequency);
 			if(periodSamples == 0) {
 				periodSamples = 1;
 			}
@@ -52,7 +54,7 @@ public final class Oscillator {
 		float x = (float) currentSample / periodSamples;
 		switch (waveForm) {
 		case SINE:
-			value = (float)Math.sin(2.0f * Math.PI * x);
+			value = (float)MathUtils.sin(2.0f * MathUtils.PI * x);
 			break;
 		case SQUARE:
 			if (currentSample < (periodSamples / 2)) {
@@ -62,13 +64,13 @@ public final class Oscillator {
 			}
 			break;
 		case TRIANGLE:
-			value = (float)(2.f * Math.abs(2.0 * x - 2.0 * Math.floor(x) - 1.0f) - 1.0f);
+			value = (float)(2.0f * Math.abs(2.0f * x - 2.0f * MathUtils.floor(x) - 1.0f) - 1.0f);
 			break;
 		case SAWTOOTH:
-			value = (float)(2.0f * (x - Math.floor(x) - 0.5f));
+			value = (float)(2.0f * (x - MathUtils.floor(x) - 0.5f));
 			break;
 		case REVERSE_SAWTOOTH:
-			value = (float)(2.0f * (Math.floor(x) - x + 0.5f));
+			value = (float)(2.0f * (MathUtils.floor(x) - x + 0.5f));
 			break;
 		default:
 			throw new RuntimeException("Illegal wave type: " + waveForm);
