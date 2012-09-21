@@ -39,7 +39,6 @@ public class Slider implements ApplicationListener, InputProcessor {
 	int[] lastTx = new int[MAX_CHANNELS];
 	int[] lastTy = new int[MAX_CHANNELS];
 
-	AudioDevice audioDevice;
 	Mixer mixer;
 	List<Keyboard> keyboards;
 	Context context;
@@ -252,18 +251,13 @@ public class Slider implements ApplicationListener, InputProcessor {
 			}
 			mixer.addKeyboard(kbd);
 		}
-		audioDevice = Gdx.audio.newAudioDevice(sampleRate, true);
-		audioDevice.setVolume(1);
 		keyboards = mixer.getKeyboards();
-		mixer.setAudioDevice(audioDevice);
+		mixer.setSampleRate(sampleRate);
 		mixer.start();		
 	}
 
 	void deinit() {
 		mixer.stop();
-		mixer.setAudioDevice(null);
-		audioDevice.setVolume(0);
-		audioDevice.dispose();
 		texture.dispose();
 		pixmap.dispose();
 	}
