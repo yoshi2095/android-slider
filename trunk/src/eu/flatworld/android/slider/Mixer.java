@@ -3,31 +3,36 @@ package eu.flatworld.android.slider;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
+import android.util.Log;
+
 import com.badlogic.gdx.audio.AudioDevice;
 
 public class Mixer implements Runnable {
 	List<Keyboard> keyboards;
-	AudioDevice audioDevice;
-	
+	AudioTrack track;
+
 	boolean stop = false;
 	Thread thread;
 
-	int bufferSize;
-	short[] buffer;	
+	int sampleRate;
+	int bufferSize = 44100;
+	short[] buffer;
 
 	public Mixer() {
 		keyboards = new ArrayList<Keyboard>();
-		bufferSize = 1024;
 	}
 
 	public void addKeyboard(Keyboard keyboard) {
 		keyboards.add(keyboard);
 	}
-	
+
 	public void removeKeyboard(Keyboard keyboard) {
 		keyboards.remove(keyboard);
 	}
-	
+
 	public List<Keyboard> getKeyboards() {
 		return keyboards;
 	}
@@ -40,14 +45,18 @@ public class Mixer implements Runnable {
 		this.bufferSize = bufferSize;
 	}
 
-	public void setAudioDevice(AudioDevice audioDevice) {
-		this.audioDevice = audioDevice;
+	public int getSampleRate() {
+		return sampleRate;
 	}
-	
+
+	public void setSampleRate(int sampleRate) {
+		this.sampleRate = sampleRate;
+	}
+
 	void fillBuffer(short[] buffer) {
 		for (int i = 0; i < buffer.length; i++) {
 			float val = 0;
-			for (int j=0; j<keyboards.size(); j++) {
+			for (int j = 0; j < keyboards.size(); j++) {
 				Keyboard k = keyboards.get(j);
 				List<SoundGenerator> sgg = k.getSoundGenerators();
 				for (int m = 0; m < sgg.size(); m++) {
@@ -64,14 +73,14 @@ public class Mixer implements Runnable {
 			if (val < -1) {
 				val = -1;
 			}
-			buffer[i] = (short)(val * Short.MAX_VALUE);
+			buffer[i] = (short) (val * Short.MAX_VALUE);
 		}
 	}
 
 	public void run() {
 		while (!stop) {
 			fillBuffer(buffer);
-			audioDevice.writeSamples(buffer, 0, bufferSize);
+			track.write(buffer, 0, bufferSize);
 		}
 	}
 
@@ -83,7 +92,19 @@ public class Mixer implements Runnable {
 	}
 
 	public void start() {
-		buffer = new short[bufferSize];		
+		int minSize = AudioTrack.getMinBufferSize(sampleRate,
+				AudioFormat.CHANNEL_CONFIGURATION_MONO,
+				AudioFormat.ENCODING_PCM_16BIT);
+		if (bufferSize < minSize) {
+			bufferSize = minSize;
+		}
+		track = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate,
+				AudioFormat.CHANNEL_CONFIGURATION_MONO,
+				AudioFormat.ENCODING_PCM_16BIT, bufferSize, AudioTrack.MODE_STREAM);
+		track.play();
+		Log.i(Slider.LOGTAG, "Minimum buffer size: " + minSize);
+		Log.i(Slider.LOGTAG, "Minimum buffer size: " + bufferSize);
+		buffer = new short[bufferSize];
 		stop = false;
 		thread = new Thread(this);
 		thread.setPriority(Thread.MAX_PRIORITY);
@@ -94,10 +115,11 @@ public class Mixer implements Runnable {
 		stop = true;
 		try {
 			thread.join();
-		} catch(Exception ex) {			
+		} catch (Exception ex) {
 		}
 		keyboards.clear();
 		keyboards = null;
 		buffer = null;
+		track.stop();
 	}
 }
