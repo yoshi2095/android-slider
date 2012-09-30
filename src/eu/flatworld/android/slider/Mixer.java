@@ -54,6 +54,7 @@ public class Mixer implements Runnable {
 	}
 
 	void fillBuffer(short[] buffer) {
+		//Log.d(Slider.LOGTAG, "Start fill");
 		for (int i = 0; i < buffer.length; i++) {
 			float val = 0;
 			for (int j = 0; j < keyboards.size(); j++) {
@@ -74,13 +75,16 @@ public class Mixer implements Runnable {
 				val = -1;
 			}
 			buffer[i] = (short) (val * Short.MAX_VALUE);
+			Thread.yield();
 		}
+		//Log.d(Slider.LOGTAG, "Stop fill");
 	}
 
 	public void run() {
 		while (!stop) {
 			fillBuffer(buffer);
-			track.write(buffer, 0, bufferSize);
+			int n = track.write(buffer, 0, bufferSize);
+			//Log.d(Slider.LOGTAG, String.format("Write buffer %d/%d", n, buffer.length));
 		}
 	}
 
