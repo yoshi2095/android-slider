@@ -2,7 +2,6 @@ package eu.flatworld.android.slider;
 
 import com.badlogic.gdx.math.MathUtils;
 
-import eu.flatworld.android.slider.R;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.preference.Preference;
