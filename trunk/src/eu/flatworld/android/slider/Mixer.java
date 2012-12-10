@@ -8,8 +8,6 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.util.Log;
 
-import com.badlogic.gdx.audio.AudioDevice;
-
 public class Mixer implements Runnable {
 	List<Keyboard> keyboards;
 	AudioTrack track;
@@ -54,7 +52,7 @@ public class Mixer implements Runnable {
 	}
 
 	void fillBuffer(short[] buffer) {
-		//Log.d(Slider.LOGTAG, "Start fill");
+		// Log.d(Slider.LOGTAG, "Start fill");
 		for (int i = 0; i < buffer.length; i++) {
 			float val = 0;
 			for (int j = 0; j < keyboards.size(); j++) {
@@ -77,14 +75,15 @@ public class Mixer implements Runnable {
 			buffer[i] = (short) (val * Short.MAX_VALUE);
 			Thread.yield();
 		}
-		//Log.d(Slider.LOGTAG, "Stop fill");
+		// Log.d(Slider.LOGTAG, "Stop fill");
 	}
 
 	public void run() {
 		while (!stop) {
 			fillBuffer(buffer);
 			int n = track.write(buffer, 0, bufferSize);
-			//Log.d(Slider.LOGTAG, String.format("Write buffer %d/%d", n, buffer.length));
+			// Log.d(Slider.LOGTAG, String.format("Write buffer %d/%d", n,
+			// buffer.length));
 		}
 	}
 
@@ -104,7 +103,8 @@ public class Mixer implements Runnable {
 		}
 		track = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate,
 				AudioFormat.CHANNEL_CONFIGURATION_MONO,
-				AudioFormat.ENCODING_PCM_16BIT, bufferSize, AudioTrack.MODE_STREAM);
+				AudioFormat.ENCODING_PCM_16BIT, bufferSize,
+				AudioTrack.MODE_STREAM);
 		track.play();
 		Log.i(Slider.LOGTAG, "Minimum buffer size: " + minSize);
 		Log.i(Slider.LOGTAG, "Minimum buffer size: " + bufferSize);
@@ -116,14 +116,18 @@ public class Mixer implements Runnable {
 	}
 
 	public void stop() {
-		stop = true;
-		try {
-			thread.join();
-		} catch (Exception ex) {
+		if (thread != null) {
+			stop = true;
+			try {
+				thread.join();
+			} catch (Exception ex) {
+			}
 		}
 		keyboards.clear();
 		keyboards = null;
 		buffer = null;
-		track.stop();
+		if (track != null) {
+			track.stop();
+		}
 	}
 }
