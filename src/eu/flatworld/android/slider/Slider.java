@@ -57,7 +57,7 @@ public class Slider implements ApplicationListener, InputProcessor {
 	float fgB;
 	float fgA;
 
-	boolean showFps = false;
+	boolean showStats = false;
 	boolean dynamicBackground = false;
 
 	BitmapFont bf;
@@ -75,9 +75,9 @@ public class Slider implements ApplicationListener, InputProcessor {
 		Arrays.fill(lastTy, Integer.MAX_VALUE);
 	}
 
-	void drawFps(float x, float y) {
-		bf.draw(sb, String.format("%d fps", Gdx.graphics.getFramesPerSecond()),
-				x, y);
+	CpuLoad cpu = new CpuLoad();
+	void drawStats(float x, float y) {
+		bf.draw(sb, String.format("FPS: %2d  CPU: %.2f", Gdx.graphics.getFramesPerSecond(), cpu.getUsage()),x, y);
 	}
 
 	public void create() {
@@ -118,45 +118,20 @@ public class Slider implements ApplicationListener, InputProcessor {
 	}
 
 	public void render() {
-		Gdx.gl.glClearColor(0, 0, 0, 0);
+		Gdx.gl.glClearColor(bgR, bgG, bgB, bgA);
 		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
 		sb.begin();
-
-		if (dynamicBackground) {
-			sb.enableBlending();
-			sb.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			pixmap.setColor(bgR, bgG, bgB, bgA);
-			pixmap.fill();
-			//pixmap.setColor(1, 1, 1, 1);
-			//pixmap.drawLine(0, PIXMAP_HEIGHT / 2, PIXMAP_WIDTH - 1,
-			//		PIXMAP_HEIGHT / 2);
-			texture.bind();
-			Gdx.gl.glTexImage2D(GL10.GL_TEXTURE_2D, 0, GL10.GL_RGBA,
-					PIXMAP_WIDTH, PIXMAP_HEIGHT, 0, GL10.GL_RGBA,
-					GL10.GL_UNSIGNED_BYTE, pixmap.getPixels());
-			sb.draw(texture, 0, 0, w, h);
-		}
 		
-		// Color oldc = sb.getColor();
-		// sb.setColor(oldc.r, oldc.g, oldc.b, 0.50f);
 		for (int i = 0; i < keyboards.size(); i++) {
 			Keyboard k = keyboards.get(i);
 			npKbd[i].draw(sb, k.x, k.y, k.w, k.h);
 		}
-		// sb.setColor(oldc);
 
-		if (showFps) {
-			drawFps(Gdx.graphics.getWidth() - 100, 50);
+		if (showStats) {
+			sb.setColor(1f, 1f, 1f, 1f);
+			drawStats(Gdx.graphics.getWidth() - 250, 50);
 		}
 		sb.end();
-
-		/*
-		 * Gdx.gl10.glColor4f(1, 0, 0, 0); Mesh m = new Mesh(true, 4, 4, new
-		 * VertexAttribute(Usage.Position, 3, "a_position")); m.setVertices(new
-		 * float[] { 100,100,0, 100,200,0, 200,100,0, 200,200,0 });
-		 * m.setIndices(new short[] {0,1,2,3});
-		 * m.render(Gdx.gl10.GL_TRIANGLE_STRIP); m.dispose();
-		 */
 	}
 
 	public void resize(int width, int height) {
@@ -179,7 +154,7 @@ public class Slider implements ApplicationListener, InputProcessor {
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
 		PreferenceManager.setDefaultValues(context, R.xml.preferences, true);
 
-		showFps = pref.getBoolean("showfps", false);
+		showStats = pref.getBoolean("showstats", false);
 		dynamicBackground = pref.getBoolean("dynamicbackground", false);		
 		
 		GA.setCustomVar(2, "DynamicBackground", "" + dynamicBackground, GA.SCOPE_SESSION);
@@ -253,7 +228,8 @@ public class Slider implements ApplicationListener, InputProcessor {
 		}
 		keyboards = mixer.getKeyboards();
 		mixer.setSampleRate(sampleRate);
-		mixer.start();		
+		mixer.start();
+		updateRGBA(-1, 0, 0);
 	}
 
 	void deinit() {
@@ -284,6 +260,13 @@ public class Slider implements ApplicationListener, InputProcessor {
 	float hsv[] = new float[] { 0, 1, 1 };
 
 	void updateRGBA(int pointer, float x, float y) {
+		if(!dynamicBackground || pointer == -1) {
+			bgR = 0;
+			bgG = 0;
+			bgB = 0;
+			bgA = 0;
+			return;
+		}
 		if (pointer == 0) {
 			hsv[0] = x / w * 360;			
 		}
@@ -320,9 +303,7 @@ public class Slider implements ApplicationListener, InputProcessor {
 		cam.unproject(p1.set(tx, ty, 0));
 		x = (int) p1.x;
 		y = (int) p1.y;
-		if (dynamicBackground) {
-			updateRGBA(pointer, x, y);
-		}
+		updateRGBA(pointer, x, y);
 		Keyboard kbd = null;
 		for (int i = 0; i < keyboards.size(); i++) {
 			kbd = keyboards.get(i);
@@ -362,9 +343,7 @@ public class Slider implements ApplicationListener, InputProcessor {
 		cam.unproject(p1.set(tx, ty, 0));
 		x = (int) p1.x;
 		y = (int) p1.y;
-		if (dynamicBackground) {
-			updateRGBA(pointer, x, y);
-		}
+		updateRGBA(pointer, x, y);
 		Keyboard kbd = pointerKeyboard.get(pointer);
 		kbd.touchDragged(pointer, x, y);
 		return true;
