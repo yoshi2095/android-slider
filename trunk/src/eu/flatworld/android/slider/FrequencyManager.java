@@ -22,15 +22,19 @@ public class FrequencyManager {
 	public float getFrequency(float value) {
 		float min = 1;
 		float max = 0;
+		int minpos = 0;
+		int maxpos = 1;
 		int i = 0;
 		for (i = 0; i < hzPosition.length - 1; i++) {
 			min = hzPosition[i];
 			max = hzPosition[i + 1];
+			minpos = i;
+			maxpos = i+1;
 			if (value >= min && value <= max) {
 				break;
 			}
 		}
-		float f =  hz[i] + (value - min) / (max - min) * (hz[i + 1] - hz[i]);
+		float f =  hz[minpos] + (value - min) / (max - min) * (hz[maxpos] - hz[minpos]);
 		return f;
 	}
 }
